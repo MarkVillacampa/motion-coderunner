@@ -6,6 +6,8 @@ It is very useful to quickly test some piece of code using a new Cocoa framework
 
 The script runs as an OSX app, so you cannot load iOS-specific frameworks. However, OSX and iOS share a lot of frameworks that you can use.
 
+![screenshot](screenshot.png)
+
 # How to install
 
 1. Clone this repository somewhere in your Mac.
