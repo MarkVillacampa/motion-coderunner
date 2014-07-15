@@ -22,7 +22,9 @@ The script runs as an OSX app, so you cannot load iOS-specific frameworks. Howev
 
   ruby "/Users/mark/src/motion-coderunner/motion-coderunner.rb" "$@"
 
-6. Create a new CodeRunner file, set the language to Rubymotion, and write some code.
+6. Add `$compiler` into "Run Command:".
+
+7. Create a new CodeRunner file, set the language to Rubymotion, and write some code.
 
 # Extra frameworks
 

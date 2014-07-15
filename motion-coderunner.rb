@@ -86,4 +86,4 @@ frameworks = %W{AppKit Foundation CoreGraphics CoreServices ApplicationServices 
 frameworks_flags = frameworks.map { |f| "-framework #{f}"}.join(' ')
 
 system %Q{ clang++ -o /tmp/a.out /tmp/main.o #{bs_frameworks} "/tmp/#{filename}.x86_64.o" -arch x86_64 -L/Library/RubyMotion/data/osx/#{osx_version}/MacOSX -lrubymotion-static -lobjc -licucore #{frameworks_flags} }
-system "/tmp/a.out"
+puts "/tmp/a.out"
