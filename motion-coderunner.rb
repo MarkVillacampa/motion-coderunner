@@ -14,8 +14,6 @@ else
   filedir = ARGV[3]
 end
 
-filepath = File.join(filedir, filename)
-
 osx_version = `sw_vers -productVersion`.strip.match(/((\d+).(\d+))/)[0]
 
 mrep = "MREP_THERE_IS_ONLY_ONE_FILE"
@@ -28,9 +26,9 @@ bs_frameworks = Dir.glob("/Library/RubyMotion/data/osx/#{osx_version}/BridgeSupp
 #########################
 
 env = %Q{ /usr/bin/env VM_PLATFORM="MacOSX" VM_KERNEL_PATH="/Library/RubyMotion/data/osx/#{osx_version}/MacOSX/kernel-x86_64.bc" VM_OPT_LEVEL="0" /usr/bin/arch -arch x86_64 }
-system %Q{ #{env} /Library/RubyMotion/bin/ruby #{bs_frameworks} --emit-llvm "#{filepath}.x86_64.s" #{mrep} "#{filepath}" }
+system %Q{ #{env} /Library/RubyMotion/bin/ruby #{bs_frameworks} --emit-llvm "/tmp/#{filename}.x86_64.s" #{mrep} "#{filename}" }
 
-system %Q{ clang -fexceptions -c -arch x86_64 "#{filepath}.x86_64.s" -o "#{filepath}.x86_64.o" }
+system %Q{ clang -fexceptions -c -arch x86_64 "/tmp/#{filename}.x86_64.s" -o "/tmp/#{filename}.x86_64.o" }
 
 #######################
 #### BUILD main.mm ####
@@ -77,8 +75,8 @@ main(int argc, char **argv)
 }
 EOS
 
-File.open("main.mm", 'w') { |io| io.write(main_txt) }
-system "clang++ main.mm -o main.o -arch x86_64 -O0 -fexceptions -fblocks -fmodules -c"
+File.open("/tmp/main.mm", 'w') { |io| io.write(main_txt) }
+system "clang++ /tmp/main.mm -o /tmp/main.o -arch x86_64 -O0 -fexceptions -fblocks -fmodules -c"
 
 #########################
 #### LINK EXECUTABLE ####
@@ -87,5 +85,5 @@ system "clang++ main.mm -o main.o -arch x86_64 -O0 -fexceptions -fblocks -fmodul
 frameworks = %W{AppKit Foundation CoreGraphics CoreServices ApplicationServices AudioToolbox AudioUnit CoreData QuartzCore Security CoreAudio DiskArbitration OpenGL ImageIO CoreText CoreFoundation CFNetwork SystemConfiguration IOSurface Accelerate CoreVideo}.concat(extra_frameworks)
 frameworks_flags = frameworks.map { |f| "-framework #{f}"}.join(' ')
 
-system %Q{ clang++ -o "#{filename}" main.o "#{filepath}.x86_64.o" -arch x86_64 -L/Library/RubyMotion/data/osx/#{osx_version}/MacOSX -lrubymotion-static -lobjc -licucore #{frameworks_flags} }
-system "./#{filename}"
+system %Q{ clang++ -o /tmp/a.out /tmp/main.o "/tmp/#{filename}.x86_64.o" -arch x86_64 -L/Library/RubyMotion/data/osx/#{osx_version}/MacOSX -lrubymotion-static -lobjc -licucore #{frameworks_flags} }
+puts "/tmp/a.out"
