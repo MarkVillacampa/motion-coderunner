@@ -18,8 +18,20 @@ osx_version = `sw_vers -productVersion`.strip.match(/((\d+).(\d+))/)[0]
 
 mrep = "MREP_THERE_IS_ONLY_ONE_FILE"
 
-frameworks_stubs = Dir.glob("/Library/RubyMotion/data/osx/#{osx_version}/BridgeSupport/*_stubs.o").map { |f| %Q{"#{f}"} }.join(' ')
-bs_frameworks = Dir.glob("/Library/RubyMotion/data/osx/#{osx_version}/BridgeSupport/*.bridgesupport").map { |f| "--uses-bs #{f}"}.join(' ')
+frameworks = %W{AppKit Foundation CoreGraphics CoreServices ApplicationServices AudioToolbox AudioUnit CoreData QuartzCore Security CoreAudio DiskArbitration OpenGL ImageIO CoreText CoreFoundation CFNetwork SystemConfiguration IOSurface Accelerate CoreVideo}.concat(extra_frameworks)
+frameworks_flags = frameworks.map { |f| "-framework #{f}"}.join(' ')
+
+
+frameworks_stubs = frameworks.map { |framework|
+  stub_file = "/Library/RubyMotion/data/osx/#{osx_version}/MacOSX/#{framework}_stubs.o"
+  File.exist?(stub_file) ? %Q{"#{stub_file}"} : nil
+}.compact.join(' ')
+
+bs_frameworks = (frameworks + ['RubyMotion']).map { |framework|
+  bs_file ="/Library/RubyMotion/data/osx/#{osx_version}/BridgeSupport/#{framework}.bridgesupport"
+  File.exist?(bs_file) ? %Q{--uses-bs "#{bs_file}"} : nil
+}.join(' ')
+
 
 #########################
 #### BUILD ruby file ####
@@ -81,9 +93,6 @@ system "clang++ /tmp/main.mm -o /tmp/main.o -arch x86_64 -O0 -fexceptions -fbloc
 #########################
 #### LINK EXECUTABLE ####
 #########################
-
-frameworks = %W{AppKit Foundation CoreGraphics CoreServices ApplicationServices AudioToolbox AudioUnit CoreData QuartzCore Security CoreAudio DiskArbitration OpenGL ImageIO CoreText CoreFoundation CFNetwork SystemConfiguration IOSurface Accelerate CoreVideo}.concat(extra_frameworks)
-frameworks_flags = frameworks.map { |f| "-framework #{f}"}.join(' ')
 
 system %Q{ clang++ -o /tmp/a.out /tmp/main.o "/tmp/#{filename}.x86_64.o" -arch x86_64 -L/Library/RubyMotion/data/osx/#{osx_version}/MacOSX -lrubymotion-static -lobjc -licucore #{frameworks_flags} }
 puts "/tmp/a.out"
