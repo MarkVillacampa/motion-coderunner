@@ -1,8 +1,10 @@
 #!/bin/ruby
 
-raise "You don't seem to have RubyMotion installed" unless Dir.exist? "/Library/RubyMotion/"
+rubymotion_dir = "/Library/RubyMotion"
 
-require '/Library/RubyMotion/lib/motion/version.rb'
+raise "You don't seem to have RubyMotion installed" unless Dir.exist?(rubymotion_dir)
+
+require "#{rubymotion_dir}/lib/motion/version.rb"
 
 filename = ARGV[0]
 
@@ -23,12 +25,12 @@ frameworks_flags = frameworks.map { |f| "-framework #{f}"}.join(' ')
 
 
 frameworks_stubs = frameworks.map { |framework|
-  stub_file = "/Library/RubyMotion/data/osx/#{osx_version}/MacOSX/#{framework}_stubs.o"
+  stub_file = "#{rubymotion_dir}/data/osx/#{osx_version}/MacOSX/#{framework}_stubs.o"
   File.exist?(stub_file) ? %Q{"#{stub_file}"} : nil
 }.compact.join(' ')
 
 bs_frameworks = (frameworks + ['RubyMotion']).map { |framework|
-  bs_file ="/Library/RubyMotion/data/osx/#{osx_version}/BridgeSupport/#{framework}.bridgesupport"
+  bs_file ="#{rubymotion_dir}/data/osx/#{osx_version}/BridgeSupport/#{framework}.bridgesupport"
   File.exist?(bs_file) ? %Q{--uses-bs "#{bs_file}"} : nil
 }.join(' ')
 
@@ -37,8 +39,8 @@ bs_frameworks = (frameworks + ['RubyMotion']).map { |framework|
 #### BUILD ruby file ####
 #########################
 
-env = %Q{ /usr/bin/env VM_PLATFORM="MacOSX" VM_KERNEL_PATH="/Library/RubyMotion/data/osx/#{osx_version}/MacOSX/kernel-x86_64.bc" VM_OPT_LEVEL="0" /usr/bin/arch -arch x86_64 }
-system %Q{ #{env} /Library/RubyMotion/bin/ruby #{bs_frameworks} --emit-llvm "/tmp/#{filename}.x86_64.s" #{mrep} "#{filename}" }
+env = %Q{ /usr/bin/env VM_PLATFORM="MacOSX" VM_KERNEL_PATH="#{rubymotion_dir}/data/osx/#{osx_version}/MacOSX/kernel-x86_64.bc" VM_OPT_LEVEL="0" /usr/bin/arch -arch x86_64 }
+system %Q{ #{env} #{rubymotion_dir}/bin/ruby #{bs_frameworks} --emit-llvm "/tmp/#{filename}.x86_64.s" #{mrep} "#{filename}" }
 
 system %Q{ clang -fexceptions -c -arch x86_64 "/tmp/#{filename}.x86_64.s" -o "/tmp/#{filename}.x86_64.o" }
 
@@ -94,5 +96,8 @@ system "clang++ /tmp/main.mm -o /tmp/main.o -arch x86_64 -O0 -fexceptions -fbloc
 #### LINK EXECUTABLE ####
 #########################
 
-system %Q{ clang++ -o /tmp/a.out /tmp/main.o "/tmp/#{filename}.x86_64.o" -arch x86_64 -L/Library/RubyMotion/data/osx/#{osx_version}/MacOSX -lrubymotion-static -lobjc -licucore #{frameworks_flags} }
+kernel_o = "#{rubymotion_dir}/data/osx/#{osx_version}/MacOSX/kernel.o"
+kernel_o = File.exists?(kernel_o) ? kernel_o : ''
+
+system %Q{ clang++ -o /tmp/a.out /tmp/main.o #{kernel_o} "/tmp/#{filename}.x86_64.o" -arch x86_64 -L#{rubymotion_dir}/data/osx/#{osx_version}/MacOSX -lrubymotion-static -lobjc -licucore #{frameworks_flags} }
 puts "/tmp/a.out"
