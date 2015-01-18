@@ -20,7 +20,13 @@ The script runs as an OSX app, so you cannot load iOS-specific frameworks. Howev
 
 5. A new file will open. Replace its contents with the following line. The path is the local path to the `motion-coderunner.rb` file in your Mac.
 
-  ruby "/Users/mark/src/motion-coderunner/motion-coderunner.rb" "$@"
+```bash
+# Coderunner version 1.x
+ruby "/Users/mark/src/motion-coderunner/motion-coderunner.rb" "$@"
+  
+# Coderunner version 2.x
+ruby "/Users/mark/src/motion-coderunner/motion-coderunner.rb" "$CR_FILENAME" "$CR_ENCODING" "$@" "$CR_TMPDIR"
+```
 
 6. Add `$compiler` into "Run Command:".
 
