@@ -28,4 +28,4 @@ The script runs as an OSX app, so you cannot load iOS-specific frameworks. Howev
 
 # Extra frameworks
 
-By default, the script will link agaisnt a set of default frameworks. However, you can click the "Custom Run" button, and add more frameworks by writing their names (space separated) in the "Compilation Flags" field.
+By default, the script will link against a set of default frameworks. However, you can click the "Custom Run" button, and add more frameworks by writing their names (space separated) in the "Compilation Flags" field.
