@@ -7,14 +7,8 @@ raise "You don't seem to have RubyMotion installed" unless Dir.exist?(rubymotion
 require "#{rubymotion_dir}/lib/motion/version.rb"
 
 filename = ARGV[0]
-
-if Dir.exist? ARGV[2]
-  extra_frameworks = []
-  filedir = ARGV[2]
-else
-  extra_frameworks = ARGV[2].split(' ')
-  filedir = ARGV[3]
-end
+extra_frameworks = []
+extra_frameworks = ARGV[1].split(' ') if ARGV[1]
 
 osx_version = `sw_vers -productVersion`.strip.match(/((\d+).(\d+))/)[0]
 
@@ -99,5 +93,5 @@ system "clang++ /tmp/main.mm -o /tmp/main.o -arch x86_64 -O0 -fexceptions -fbloc
 kernel_o = "#{rubymotion_dir}/data/osx/#{osx_version}/MacOSX/kernel.o"
 kernel_o = File.exists?(kernel_o) ? kernel_o : ''
 
-system %Q{ clang++ -o /tmp/a.out /tmp/main.o #{kernel_o} "/tmp/#{filename}.x86_64.o" -arch x86_64 -L#{rubymotion_dir}/data/osx/#{osx_version}/MacOSX -lrubymotion-static -lobjc -licucore #{frameworks_flags} }
+system %Q{ clang++ -o /tmp/a.out /tmp/main.o #{kernel_o} "/tmp/#{filename}.x86_64.o" -arch x86_64 -L#{rubymotion_dir}/data/osx/#{osx_version}/MacOSX -lrubymotion-static -lobjc -licucore #{frameworks_stubs} #{frameworks_flags} }
 puts "/tmp/a.out"
